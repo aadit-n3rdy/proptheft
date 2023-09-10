@@ -2,8 +2,6 @@ package main
 
 import (
 	"net/http"
-	"os"
-	"path/filepath"
 	"context"
 	"fmt"
 	"log"
@@ -22,20 +20,10 @@ func FailureHandler(writer http.ResponseWriter, req *http.Request, err *error) {
 }
 
 func DefaultHandler(writer http.ResponseWriter, req *http.Request) {
-	var urlPath string;
-	if (req.URL.Path == "/") {
-		urlPath = "/index.html";
-	} else {
-		urlPath = req.URL.Path;
-	}
-	buf, err := os.ReadFile(filepath.Join("web", urlPath));
-	if (err != nil) {
-		writer.WriteHeader(http.StatusNotFound);
-		writer.Write([]byte("ERROR 404: Resource Not Found"));
-		fmt.Println("Resource at URL ", req.URL.Path, " not found");
-		return;
-	}
-	writer.Write(buf);
+	writer.WriteHeader(http.StatusNotFound);
+	writer.Write([]byte("ERROR 404: Resource Not Found"));
+	fmt.Println("Resource at URL ", req.URL.Path, " not found");
+	return;
 }
 
 func RepeatHandler(writer http.ResponseWriter, req *http.Request) {
@@ -76,13 +64,14 @@ func main() {
 	}
 
 	router := chi.NewRouter();
-	router.Get("/*", DefaultHandler);
+	router.Mount("/", http.FileServer(http.Dir("./web")));
 
 	apiRouter := chi.NewRouter();
 	apiRouter.Get("/query", QueryHandler);
 	apiRouter.Get("/repeat/{msg}", RepeatHandler);
 
 	router.Mount("/api", apiRouter);
+	router.NotFound(DefaultHandler);
 
 	dbpool, err = pgxpool.New(context.Background(), "postgresql://test:test_passwd@localhost:5432/backend_test");
 	if (err != nil) {
