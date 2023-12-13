@@ -17,6 +17,7 @@ app.get('/users/allusers', users.getAllUsers);
 app.get('/users/admins', users.getAdmins);
 app.get('/users/norm_users', users.getUsers);
 app.post('/users/hash', users.getHashing);
+app.post('/users/assignperms', users.assignPerms);
 app.post('/users/signup', uauth.signUp);
 
 app.get('/data/getDataInRange', data.getDataInRange);
@@ -24,7 +25,7 @@ app.get('/data/getDataWithProd', data.getDataWithProduct);
 app.get('/data/getSumofData', data.getSumOfData);
 app.get('/data/getsuidbased', data.getDataBasedOnSuId);
 app.get('/data/getpbased', data.getDataBasedOnPId);
-app.get('/data/getyrstatebased', data.getDataYrState);
+app.get('/data/getdataper', data.getDataPer);
 
 
 app.listen(port, () => {

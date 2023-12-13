@@ -7,6 +7,7 @@ const auth = require('../middleware/userauth')
 allusers = 'SELECT * FROM db_user';
 getadmins = 'SELECT * FROM db_user WHERE u_acc_type = $1';
 getusers = 'SELECT * FROM db_user WHERE u_acc_type = $1';
+assign_perms = 'INSERT INTO user_securitypolicy VALUES ($1, $2);';
 
 
 const getAllUsers = async (req, res) => {
@@ -35,9 +36,16 @@ const getHashing = async (req, res) => {
   res.send({data: response});
 }
 
+const assignPerms = async(req, res) => {
+    const response = await pool.query(assign_perms, [req.body.u_email, req.body.sp_id]);
+    res.status(200);
+    res.send({data: response});
+}
+
 module.exports = {
   getAllUsers,
   getAdmins,
   getUsers,
-  getHashing
+  getHashing,
+  assignPerms
 }
