@@ -1,4 +1,5 @@
 const users = require('./queries/db_users')
+const data = require('./queries/data');
 const uauth = require('./middleware/userauth')
 
 const express = require('express');
@@ -12,11 +13,15 @@ app.use(cors());
 app.get('/', (req, res) => {
   res.json({info: "base api"})
 })
-app.get('/allusers', users.getAllUsers);
-app.get('/admins', users.getAdmins);
-app.get('/users', users.getUsers);
-app.post('/hash', users.getHashing);
-app.post('/signup', uauth.signUp);
+app.get('/users/allusers', users.getAllUsers);
+app.get('/users/admins', users.getAdmins);
+app.get('/users/norm_users', users.getUsers);
+app.post('/users/hash', users.getHashing);
+app.post('/users/signup', uauth.signUp);
+
+app.get('/data/getDataInRange', data.getDataInRange);
+app.get('/data/getDataWithProd', data.getDataWithProduct);
+app.get('/data/getSumofData', data.getSumOfData);
 
 app.listen(port, () => {
   console.log(`App running on port ${port}`);
