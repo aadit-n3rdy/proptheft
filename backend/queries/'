@@ -36,9 +36,8 @@ const getHashing = async (req, res) => {
   res.send({data: response});
 }
 
-const assignPerms = async(req, res) => {
-  console.log(req);
-  const response = await pool.query(assign_perms, [req.query.u_email, req.query.sp_id]);
+const assignPerms(u_email, sp_id) {
+  const response = await pool.query(assign_perms, [u_email, sp_id]);
   res.status(200);
   res.send({data: response});
 }

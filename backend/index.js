@@ -16,8 +16,10 @@ app.get('/', (req, res) => {
 app.get('/users/allusers', users.getAllUsers);
 app.get('/users/admins', users.getAdmins);
 app.get('/users/norm_users', users.getUsers);
-app.post('/users/hash', users.getHashing);
+app.get('/users/hash', users.getHashing);
+
 app.post('/users/assignperms', users.assignPerms);
+
 app.post('/users/signup', uauth.signUp);
 
 app.get('/data/getDataInRange', data.getDataInRange);
