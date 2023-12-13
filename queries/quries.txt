@@ -1,0 +1,26 @@
+//get averages of the case stolen, recovered, values stolen, recovered from data_based_on_p_id_year_su_id
+select dpi.p_id, dpi.p_name, dpi.su_id, dpi.sud_year, avg(cs), avg(vs), avg(cr), avg(vr) from ( select p_id,su_id, p_name,sud_year, unnest("cases stolen") cs, unnest("value stolen") vs, unnest("cases recovered") cr, unnest("value recovered") vr from data_based_on_p_id_year_su_id ) dpi group by dpi.p_id,dpi.p_name,dpi.su_id,dpi.sud_year order by dpi.p_id;
+
+
+data_based_on_su_id = 'SELECT sud.su_id, ARRAY_AGG(sud.sud_cases_stolen) "cases stolen",ARRAY_AGG(sud.sud_value_stolen) "value stolen", ARRAY_AGG(sud.sud_cases_recovered) "cases recovered", ARRAY_AGG(sud.sud_value_recovered) "value recovered" FROM state_ut_data sud GROUP BY sud.su_id;'
+
+data_based_on_p_id = 'SELECT p.p_id, p.p_name, ARRAY_AGG(sud.sud_cases_stolen) "cases stolen",ARRAY_AGG(sud.sud_value_stolen) "value stolen", ARRAY_AGG(sud.sud_cases_recovered) "cases recovered", ARRAY_AGG(sud.sud_value_recovered) "value recovered" FROM state_ut_data sud JOIN property p ON sud.p_id = p.p_id GROUP BY p.p_id;'
+
+data_based_on_p_id_year = 'SELECT p.p_id, p.p_name, sud.sud_year, ARRAY_AGG(sud.sud_cases_stolen) "cases stolen",ARRAY_AGG(sud.sud_value_stolen) "value stolen", ARRAY_AGG(sud.sud_cases_recovered) "cases recovered", ARRAY_AGG(sud.sud_value_recovered) "value recovered" FROM state_ut_data sud JOIN property p ON sud.p_id = p.p_id GROUP BY (p.p_id,sud.sud_year);'
+
+data_avg_of_based_pid_year_suid = 'select dpi.p_id, dpi.p_name, dpi.su_id, dpi.sud_year, avg(cs), avg(vs), avg(cr), avg(vr) from ( select p_id,su_id, p_name,sud_year, unnest("cases stolen") cs, unnest("value stolen") vs, unnest("cases recovered") cr, unnest("value recovered") vr from data_based_on_p_id_year_su_id ) dpi group by dpi.p_id,dpi.p_name,dpi.su_id,dpi.sud_year order by dpi.p_id;'
+
+
+
+percentages 
+
+create view per_value_stolen as ( select (sum(sud_value_stolen)*100)/(select sum(a) from (select sum(sud_value_stolen) a from data_based_on_p_id_year_su_id group by p_id)) from data_based_on_p_id_year_su_id group by p_id );
+
+create view per_value_recovered as ( select (sum(sud_value_recovered)*100)/(select sum(a) from (select sum(sud_value_recovered) a from data_based_on_p_id_year_su_id group by p_id)) from data_based_on_p_id_year_su_id group by p_id);
+
+create view per_cases_recovered as ( select (sum(sud_cases_recovered)*100)/(select sum(a) from (select sum(sud_cases_recovered) a from data_based_on_p_id_year_su_id group by p_id)) from data_based_on_p_id_year_su_id group by p_id );
+
+create view per_cases_stolen as ( select (sum(sud_cases_stolen)*100)/(select sum(a) from (select sum(sud_cases_stolen) a from data_based_on_p_id_year_su_id group by p_id)) from data_based_on_p_id_year_su_id group by p_id);
+
+
+select p_id, su_id, (select (sum(sud_value_stolen)*100)/(select sum(a) from (select sum(sud_value_stolen) a from data_based_on_p_id_year_su_id group by p_id))) pvs,( select (sum(sud_value_recovered)*100)/(select sum(a) from (select sum(sud_value_recovered) a from data_based_on_p_id_year_su_id group by p_id))) pvr, ( select (sum(sud_cases_recovered)*100)/(select sum(a) from (select sum(sud_cases_recovered) a from data_based_on_p_id_year_su_id group by p_id))) pcr, ( select (sum(sud_cases_stolen)*100)/(select sum(a) from (select sum(sud_cases_stolen) a from data_based_on_p_id_year_su_id group by p_id))) pcs from data_based_on_p_id_year_su_id group by p_id,su_id;

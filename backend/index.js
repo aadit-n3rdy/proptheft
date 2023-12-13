@@ -22,6 +22,10 @@ app.post('/users/signup', uauth.signUp);
 app.get('/data/getDataInRange', data.getDataInRange);
 app.get('/data/getDataWithProd', data.getDataWithProduct);
 app.get('/data/getSumofData', data.getSumOfData);
+app.get('/data/getsuidbased', data.getDataBasedOnSuId);
+app.get('/data/getpbased', data.getDataBasedOnPId);
+app.get('/data/getyrstatebased', data.getDataYrState);
+
 
 app.listen(port, () => {
   console.log(`App running on port ${port}`);
