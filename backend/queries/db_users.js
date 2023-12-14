@@ -6,7 +6,7 @@ const auth = require('../middleware/userauth')
 /* queries */
 allusers = 'SELECT * FROM db_user';
 getadmins = 'SELECT * FROM db_user WHERE u_acc_type = $1';
-getusers = 'SELECT * FROM db_user WHERE u_acc_type = $1';
+getusers = 'SELECT * FROM db_user natural join user_securitypolicy natural join securitypolicy WHERE u_acc_type = $1';
 assign_perms = 'INSERT INTO user_securitypolicy VALUES ($1, $2);';
 
 
