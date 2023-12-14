@@ -7,8 +7,7 @@ const auth = require('../middleware/userauth')
 allusers = 'SELECT * FROM db_user';
 getadmins = 'SELECT * FROM db_user WHERE u_acc_type = $1';
 getusers = 'SELECT * FROM db_user natural join user_securitypolicy natural join securitypolicy WHERE u_acc_type = $1';
-assign_perms = 'INSERT INTO user_securitypolicy VALUES ($1, $2);';
-
+assign_perms = 'INSERT INTO user_securitypolicy VALUES ($1, $2)';
 
 const getAllUsers = async (req, res) => {
   const response = await pool.query(allusers);
@@ -29,7 +28,7 @@ const getUsers = async (req, res) => {
 };
 
 const getHashing = async (req, res) => {
-  //console.log(req.query)
+  console.log(req.query);
   const response = await pass.genHash(req.query.pass);
   console.log(response);
   res.status(200);

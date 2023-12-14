@@ -7,8 +7,8 @@ async function genHash(pass) {
 }
 
 async function verifyPassHash(pass, hash) {
-  return bcrypt.compare(pass, hash) 
+  return await bcrypt.compare(pass, hash) 
 }
 
-module.exports.genHash = genHash
-module.exports.verifyPassHash = verifyPassHash
+module.exports.genHash = genHash;
+module.exports.verifyPassHash = verifyPassHash;
