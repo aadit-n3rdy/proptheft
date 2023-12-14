@@ -28,6 +28,7 @@ app.post('/users/assignperms', users.assignPerms);
 /*** user auth ***/
 app.post('/uauth/login', uauth.login);
 app.post('/uauth/signup', uauth.signUp);
+app.get('/uauth/stateperms', uauth.statePerms);
 
 
 /*** data ***/
