@@ -38,6 +38,7 @@ app.get('/data/getSumofData', data.getSumOfData);
 app.get('/data/getsuidbased', data.getDataBasedOnSuId);
 app.get('/data/getpbased', data.getDataBasedOnPId);
 app.get('/data/getdataper', data.getDataPer);
+app.get('/data/upload', data.uploadData);
 
 
 app.listen(port, () => {

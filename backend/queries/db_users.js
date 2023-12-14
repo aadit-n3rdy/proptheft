@@ -37,9 +37,15 @@ const getHashing = async (req, res) => {
 
 const assignPerms = async(req, res) => {
   console.log(req);
-  const response = await pool.query(assign_perms, [req.query.u_email, req.query.sp_id]);
-  res.status(200);
-  res.send({data: response});
+  try {
+    const response = await pool.query(assign_perms, [req.query.u_email, req.query.sp_id]);
+    res.status(200);
+    res.send({data: "permission assigned"});
+  } catch(e) {
+    console.log(e);
+    res.status(401);
+    res.send({err: "user already has permission"});
+  }
 }
 
 module.exports = {

@@ -21,15 +21,69 @@ SET default_tablespace = '';
 SET default_table_access_method = heap;
 
 --
+-- Name: state_ut_data; Type: TABLE; Schema: public; Owner: ouroboros
+--
+
+CREATE TABLE public.state_ut_data (
+    su_id character(2) NOT NULL,
+    sud_year integer NOT NULL,
+    sud_cases_stolen integer,
+    sud_value_stolen double precision,
+    sud_cases_recovered integer,
+    sud_value_recovered double precision,
+    p_id integer NOT NULL,
+    CONSTRAINT state_ut_data_check CHECK ((sud_value_recovered <= sud_value_stolen))
+);
+
+
+ALTER TABLE public.state_ut_data OWNER TO ouroboros;
+
+--
+-- Name: data_based_on_p_id; Type: VIEW; Schema: public; Owner: ouroboros
+--
+
+CREATE VIEW public.data_based_on_p_id AS
+ SELECT p_id,
+    sud_year,
+    sum(sud_cases_stolen) AS "cases stolen",
+    sum(sud_value_stolen) AS "value stolen",
+    sum(sud_cases_recovered) AS "cases recovered",
+    sum(sud_value_recovered) AS "value recovered"
+   FROM public.state_ut_data sud
+  GROUP BY p_id, sud_year
+  ORDER BY p_id, sud_year;
+
+
+ALTER VIEW public.data_based_on_p_id OWNER TO ouroboros;
+
+--
+-- Name: data_based_on_su_id; Type: VIEW; Schema: public; Owner: ouroboros
+--
+
+CREATE VIEW public.data_based_on_su_id AS
+ SELECT su_id,
+    sud_year,
+    sum(sud_cases_stolen) AS "cases stolen",
+    sum(sud_value_stolen) AS "value stolen",
+    sum(sud_cases_recovered) AS "cases recovered",
+    sum(sud_value_recovered) AS "value recovered"
+   FROM public.state_ut_data sud
+  GROUP BY su_id, sud_year
+  ORDER BY su_id, sud_year;
+
+
+ALTER VIEW public.data_based_on_su_id OWNER TO ouroboros;
+
+--
 -- Name: db_user; Type: TABLE; Schema: public; Owner: ouroboros
 --
 
 CREATE TABLE public.db_user (
     u_email character varying(320) NOT NULL,
-    u_fname character(30),
-    u_lname character(30),
+    u_fname character varying(30),
+    u_lname character varying(30),
     u_primary_phno bigint,
-    u_acc_type character(10),
+    u_acc_type character varying(10),
     u_passhash character(60),
     CONSTRAINT db_user_u_email_check CHECK (((u_email)::text ~~ '%@%'::text))
 );
@@ -87,30 +141,29 @@ CREATE TABLE public.state_ut (
 ALTER TABLE public.state_ut OWNER TO ouroboros;
 
 --
--- Name: state_ut_data; Type: TABLE; Schema: public; Owner: ouroboros
+-- Name: temp; Type: TABLE; Schema: public; Owner: ouroboros
 --
 
-CREATE TABLE public.state_ut_data (
-    su_id character(2) NOT NULL,
-    sud_year integer NOT NULL,
+CREATE TABLE public.temp (
+    su_id character(2),
+    sud_year integer,
     sud_cases_stolen integer,
     sud_value_stolen double precision,
     sud_cases_recovered integer,
     sud_value_recovered double precision,
-    p_id integer NOT NULL,
-    CONSTRAINT state_ut_data_check CHECK ((sud_value_recovered <= sud_value_stolen))
+    p_id integer
 );
 
 
-ALTER TABLE public.state_ut_data OWNER TO ouroboros;
+ALTER TABLE public.temp OWNER TO ouroboros;
 
 --
 -- Name: user_securitypolicy; Type: TABLE; Schema: public; Owner: ouroboros
 --
 
 CREATE TABLE public.user_securitypolicy (
-    u_email character varying(320),
-    sp_id integer
+    u_email character varying(320) NOT NULL,
+    sp_id integer NOT NULL
 );
 
 
@@ -121,11 +174,11 @@ ALTER TABLE public.user_securitypolicy OWNER TO ouroboros;
 --
 
 COPY public.db_user (u_email, u_fname, u_lname, u_primary_phno, u_acc_type, u_passhash) FROM stdin;
-nas@gmail.com	Nas                           	Illmatic                      	123456789	admin     	\N
-lamar@gmail.com	Kendrick                      	GKMC                          	234567890	admin     	\N
-wayne@gmail.com	Weezy                         	Carter                        	456789012	user      	\N
-mac@gmail.com	Mac                           	Swimming                      	567890123	user      	\N
-MFDOOM@gmail.com	MF                            	Madvillainy                   	345678901	user      	\N
+MFDOOM@gmail.com	MF	Madvillainy	345678901	user	$2b$10$2f7kLaPnSGd5tqtHvBkkKeZWbt8ZPStMKsIYiVoI.bdfrSv7ftTx.
+lamar@gmail.com	Kendrick	GKMC	234567890	admin	$2b$10$IAbfGrXWhSJmY2RC1rvESum.3MRoM9rc01hVW/iUrDZ3NHke7pMEW
+wayne@gmail.com	Weezy	Carter	456789012	user	$2b$10$bu9HeoFz/nhPnwW82kGfQefWJ05TB4jNg/8iskkOOcCGp3a6FDZni
+mac@gmail.com	Mac	Swimming	567890123	user	$2b$10$csvIWq63XpxpPHV2poFyi.2dXEOg7E9qDqu7Eoj1yTpWLkrvLdUSa
+nas@gmail.com	Nas	Illmatic	123456789	admin	$2b$10$H4EzbX.IWQDg4T5mL.93a./A1FJ3hP7ICakgfhKB8qFs3SQsQ7Kvu
 \.
 
 
@@ -162,18 +215,162 @@ COPY public.securitypolicy (sp_id, sp_name) FROM stdin;
 --
 
 COPY public.securitypolicy_state (sp_id, su_id, acc_lvl) FROM stdin;
-3	TN	2
-3	AP	2
-3	TG	2
-3	KL	2
-3	KA	2
-3	AS	2
-4	MN	2
-4	ML	2
-4	MZ	2
-4	NL	2
-4	SK	2
-4	TR	2
+1	CH	1
+1	DL	1
+1	HR	1
+1	HP	1
+1	JK	1
+1	LA	1
+1	PB	1
+1	RJ	1
+1	CG	1
+1	MP	1
+1	UK	1
+1	UP	1
+2	CH	0
+2	DL	0
+2	HR	0
+2	HP	0
+2	JK	0
+2	LA	0
+2	PB	0
+2	RJ	0
+2	CG	0
+2	MP	0
+2	UK	0
+2	UP	0
+3	CH	0
+3	DL	0
+3	HR	0
+3	HP	0
+3	JK	0
+3	LA	0
+3	PB	0
+3	RJ	0
+3	CG	0
+3	MP	0
+3	UK	0
+3	UP	0
+4	CH	0
+4	DL	0
+4	HR	0
+4	HP	0
+4	JK	0
+4	LA	0
+4	PB	0
+4	RJ	0
+4	CG	0
+4	MP	0
+4	UK	0
+4	UP	0
+1	AP	0
+1	TG	0
+1	TN	0
+1	TS	0
+1	KA	0
+1	KL	0
+1	PY	0
+1	LD	0
+1	AN	0
+1	OT	0
+2	AP	1
+2	TG	1
+2	TN	1
+2	TS	1
+2	KA	1
+2	KL	1
+2	PY	1
+2	LD	1
+2	AN	1
+2	OT	1
+3	AP	0
+3	TG	0
+3	TN	0
+3	TS	0
+3	KA	0
+3	KL	0
+3	PY	0
+3	LD	0
+3	AN	0
+3	OT	0
+4	AP	0
+4	TG	0
+4	TN	0
+4	TS	0
+4	KA	0
+4	KL	0
+4	PY	0
+4	LD	0
+4	AN	0
+4	OT	0
+1	DN	0
+1	DD	0
+1	GA	0
+1	GJ	0
+1	MH	0
+2	DN	0
+2	DD	0
+2	GA	0
+2	GJ	0
+2	MH	0
+3	DN	1
+3	DD	1
+3	GA	1
+3	GJ	1
+3	MH	1
+4	DN	0
+4	DD	0
+4	GA	0
+4	GJ	0
+4	MH	0
+1	BR	0
+1	JH	0
+1	OD	0
+1	WB	0
+1	AS	0
+1	AR	0
+1	MN	0
+1	ML	0
+1	MZ	0
+1	SK	0
+1	NL	0
+1	TR	0
+2	BR	0
+2	JH	0
+2	OD	0
+2	WB	0
+2	AS	0
+2	AR	0
+2	MN	0
+2	ML	0
+2	MZ	0
+2	SK	0
+2	NL	0
+2	TR	0
+3	BR	0
+3	JH	0
+3	OD	0
+3	WB	0
+3	AS	0
+3	AR	0
+3	MN	0
+3	ML	0
+3	MZ	0
+3	SK	0
+3	NL	0
+3	TR	0
+4	BR	1
+4	JH	1
+4	OD	1
+4	WB	1
+4	AS	1
+4	AR	1
+4	MN	1
+4	ML	1
+4	MZ	1
+4	SK	1
+4	NL	1
+4	TR	1
 \.
 
 
@@ -1145,13 +1342,29 @@ AP	2014	1886	52.4	399	11.1	8
 
 
 --
+-- Data for Name: temp; Type: TABLE DATA; Schema: public; Owner: ouroboros
+--
+
+COPY public.temp (su_id, sud_year, sud_cases_stolen, sud_value_stolen, sud_cases_recovered, sud_value_recovered, p_id) FROM stdin;
+\.
+
+
+--
 -- Data for Name: user_securitypolicy; Type: TABLE DATA; Schema: public; Owner: ouroboros
 --
 
 COPY public.user_securitypolicy (u_email, sp_id) FROM stdin;
-wayne@gmail.com	3
-MFDOOM@gmail.com	4
-mac@gmail.com	3
+wayne@gmail.com	4
+lamar@gmail.com	1
+lamar@gmail.com	2
+lamar@gmail.com	3
+lamar@gmail.com	4
+nas@gmail.com	4
+nas@gmail.com	3
+nas@gmail.com	2
+nas@gmail.com	1
+wayne@gmail.com	2
+wayne@gmail.com	1
 \.
 
 
@@ -1193,6 +1406,14 @@ ALTER TABLE ONLY public.state_ut_data
 
 ALTER TABLE ONLY public.state_ut
     ADD CONSTRAINT state_ut_pkey PRIMARY KEY (su_id);
+
+
+--
+-- Name: user_securitypolicy user_securitypolicy_pkey; Type: CONSTRAINT; Schema: public; Owner: ouroboros
+--
+
+ALTER TABLE ONLY public.user_securitypolicy
+    ADD CONSTRAINT user_securitypolicy_pkey PRIMARY KEY (u_email, sp_id);
 
 
 --

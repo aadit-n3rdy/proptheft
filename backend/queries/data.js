@@ -2,6 +2,14 @@ const pool = require('../pool/db')
 const pass = require('../passwords/auth')
 const auth = require('../middleware/userauth')
 
+
+const fs = require('fs');
+const { parse } = require("csv-parse");
+
+const fastcsv = require("fast-csv");
+const csvParser = require("csv-parser");
+const needle = require("needle");
+
 /* queries */
 data_in_range= 'SELECT sud1.* FROM state_ut_data sud1, db_user db1 WHERE sud1.sud_year BETWEEN $1 AND $2;';
 
@@ -17,6 +25,23 @@ data_based_on_p_id = 'select p_id, array_agg(sud_year) as year, array_agg("sud_c
 data_based_on_p_id_year = 'SELECT p.p_id, p.p_name, sud.sud_year, ARRAY_AGG(sud.sud_cases_stolen) "sud_cases_stolen",ARRAY_AGG(sud.sud_value_stolen) "sud_value_stolen", ARRAY_AGG(sud.sud_cases_recovered) "sud_cases_recovered", ARRAY_AGG(sud.sud_value_recovered) "sud_value_recovered" FROM state_ut_data sud JOIN property p ON sud.p_id = p.p_id GROUP BY (p.p_id,sud.sud_year);'
 
 data_per = 'select p_id, (sum(cs)*100/(select sum(cs) from ( select p_id, sum(cs) cs, sum(vs) vs, sum(cr) cr, sum(vr) vr from (select p_id, su_id, sud_year, sum(sud_cases_stolen) cs, sum(sud_value_stolen) vs, sum(sud_cases_recovered) cr, sum(sud_value_recovered) vr from state_ut_data group by p_id, su_id, sud_year having su_id = $1) group by p_id))) per_cs, (sum(vs)*100/(select sum(vs) from ( select p_id, sum(cs) cs, sum(vs) vs, sum(cr) cr, sum(vr) vr from (select p_id, su_id, sud_year, sum(sud_cases_stolen) cs, sum(sud_value_stolen) vs, sum(sud_cases_recovered) cr, sum(sud_value_recovered) vr from state_ut_data group by p_id, su_id, sud_year having su_id = $1) group by p_id))) per_vs, (sum(cr)*100/(select sum(cr) from ( select p_id, sum(cs) cs, sum(vs) vs, sum(cr) cr, sum(vr) vr from (select p_id, su_id, sud_year, sum(sud_cases_stolen) cs, sum(sud_value_stolen) vs, sum(sud_cases_recovered) cr, sum(sud_value_recovered) vr from state_ut_data group by p_id, su_id, sud_year having su_id = $1) group by p_id))) per_cr, (sum(vr)*100/(select sum(vr) from ( select p_id, sum(cs) cs, sum(vs) vs, sum(cr) cr, sum(vr) vr from (select p_id, su_id, sud_year, sum(sud_cases_stolen) cs, sum(sud_value_stolen) vs, sum(sud_cases_recovered) cr, sum(sud_value_recovered) vr from state_ut_data group by p_id, su_id, sud_year having su_id = $1) group by p_id))) per_vr from (select p_id, su_id, sud_year, sum(sud_cases_stolen) cs, sum(sud_value_stolen) vs, sum(sud_cases_recovered) cr, sum(sud_value_recovered) vr from state_ut_data group by p_id, su_id, sud_year having su_id = $1) group by p_id;'
+
+
+upload_data = 'insert into temp values($1, $2, $3, $4, $5, $6, $7)';
+
+const uploadData = async(req, res) => {
+ 
+  var read = fs.createReadStream("/home/ouroboros/dev/projects/stateprop/proptheft/backend/upload/upload.csv")
+  .pipe(parse({delimiter: ",", from_line: 2 }))
+  .on('data', function(data) {
+    pool.query(upload_data, [data[0],data[1],data[2],data[3],data[4],data[5],data[6]]);
+  })
+  .on('end', function(data) {
+    console.log("finished");
+  })
+  res.status(200);
+  res.send({dat:"Uploaded Data"});
+}
 
 const getDataInRange = async(req, res) => {
   const response = await pool.query(data_in_range, [req.query.y1,req.query.y2]);
@@ -60,7 +85,6 @@ const getDataPerOnPIdState = async(req, res) => {
   res.send({data: response.rows});
 }
 
-
 const getDataPer = async(req, res) => {
   const response = await pool.query(data_per, [req.query.su_id]);
   console.log("Getting Data percentage");
@@ -75,5 +99,6 @@ module.exports = {
   getSumOfData,
   getDataBasedOnSuId,
   getDataBasedOnPId,
-  getDataPer
+  getDataPer,
+  uploadData
 }
